@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API - Gerador Paleta de Cores (exemplo de uso)</title>
+  <link rel="stylesheet" href="./css/styles.css">
+    
+</head>
+<body>
+  <h1>Paleta de Cores</h1>
+
+  <div class="paleta-container" id="paletaContainer"></div>
+  <div class="info" id="info"></div>
+
+  <script>
+    async function gerarPaleta() {
+      const info = document.getElementById('info');
+      const container = document.getElementById('paletaContainer');
+      
+      container.innerHTML = '';
+      info.textContent = '';
+
+      try {
+        // Chama a API sem input
+        const url = 'http://localhost:3000/api/paleta';
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Erro ao chamar a API');
+        const data = await res.json();
+
+        const cores = [];
+
+        for (const key in data.paleta) {
+          const colorDiv = document.createElement('div');
+          colorDiv.classList.add('cor');
+          colorDiv.style.backgroundColor = data.paleta[key];
+          colorDiv.textContent = data.paleta[key];
+          container.appendChild(colorDiv);
+
+          cores.push(data.paleta[key]);
+        }
+
+        info.textContent = `Paleta gerada a partir da cor base: ${data.cor_base}`;
+
+        // Gradiente radial arredondado com transparência
+        if (cores.length >= 2) {
+          const gradientColors = cores.slice(0, 3).map(c => c + '80').join(', ');
+          document.body.style.background = `radial-gradient(circle at center, ${gradientColors})`;
+        }
+
+      } catch (err) {
+        console.error(err);
+        info.textContent = 'Erro ao gerar a paleta. Verifique a API e tente novamente.';
+      }
+    }
+
+    // Geração automática ao carregar a página
+    window.onload = gerarPaleta;
+  </script>
+</body>
